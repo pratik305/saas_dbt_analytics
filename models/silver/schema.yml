@@ -1,0 +1,37 @@
+version: 2
+
+models:
+  - name: stg_accounts
+    description: Cleaned staging model for SaaS accounts
+
+    columns:
+      - name: account_id
+        description: Unique account identifier
+        tests:
+          - not_null
+          - unique
+
+      - name: signup_date
+        tests:
+          - not_null
+
+      - name: seats
+        tests:
+          - not_null
+
+
+  - name: stg_subscriptions
+    description: Cleaned staging model for SaaS subscriptions
+
+    columns:
+      - name: subscription_id
+        tests:
+          - not_null
+          - unique
+
+      - name: account_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_accounts')
+              field: account_id

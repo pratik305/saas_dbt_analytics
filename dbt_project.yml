@@ -1,0 +1,16 @@
+name: 'saas_dbt_analytics'
+version: '1.0'
+config-version: 2
+
+profile: 'saas_dbt_analytics'
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+analysis-paths: ["analysis"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+test-paths: ["tests"]
+
+models:
+  saas_dbt_analytics:
+    +materialized: view
