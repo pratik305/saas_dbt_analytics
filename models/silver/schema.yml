@@ -33,5 +33,63 @@ models:
         tests:
           - not_null
           - relationships:
-              to: ref('stg_accounts')
-              field: account_id
+              arguments:
+                to: ref('stg_accounts')
+                field: account_id
+
+
+  - name: stg_feature_usage
+    description: Daily aggregated feature usage per subscription
+
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - subscription_id
+              - usage_date
+              - feature_name
+
+    columns:
+      - name: subscription_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_subscriptions')
+                field: subscription_id
+
+
+  - name: stg_churn_events
+    description: Cleaned staging model for churn events
+
+    columns:
+      - name: churn_event_id
+        tests:
+          - not_null
+          - unique
+
+      - name: account_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_accounts')
+                field: account_id
+
+
+  - name: stg_support_tickets
+    description: Cleaned staging model for support tickets
+
+    columns:
+      - name: ticket_id
+        tests:
+          - not_null
+          - unique
+
+      - name: account_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_accounts')
+                field: account_id
