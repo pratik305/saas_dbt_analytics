@@ -1,6 +1,11 @@
 data/
 
 
-target/
+
 dbt_packages/
+ 
+
+target/
 logs/
+.env
+profiles.yml
