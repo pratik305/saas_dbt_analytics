@@ -1,0 +1,68 @@
+version: 2
+
+models:
+  - name: int_account_subscriptions
+    description: >
+      Grain: one row per subscription.
+      Joins stg_accounts with stg_subscriptions. Adds derived fields: is_active,
+      subscription_duration_days. Used by int_account_360 and gold_mrr_trends.
+    columns:
+      - name: subscription_id
+        tests:
+          - not_null
+          - unique
+      - name: account_id
+        tests:
+          - not_null
+
+  - name: int_account_churn
+    description: >
+      Grain: one row per churn event.
+      Enriches churn events with account demographics, subscription plan at time of churn,
+      MRR lost, and a churn_path classification (direct, downgrade-to-churn, upgrade-to-churn).
+    columns:
+      - name: churn_event_id
+        tests:
+          - not_null
+          - unique
+      - name: account_id
+        tests:
+          - not_null
+
+  - name: int_account_support
+    description: >
+      Grain: one row per account.
+      Aggregates all support ticket metrics per account: ticket volume, escalation rate,
+      avg resolution time, avg satisfaction score.
+    columns:
+      - name: account_id
+        tests:
+          - not_null
+          - unique
+
+  - name: int_account_feature_usage
+    description: >
+      Grain: one row per account.
+      Aggregates feature usage across all subscriptions per account.
+      Includes engagement metrics: active_days, distinct_features_used, top_feature, error_rate_pct.
+    columns:
+      - name: account_id
+        tests:
+          - not_null
+          - unique
+
+  - name: int_account_360
+    description: >
+      Grain: one row per account.
+      Central account spine joining all intermediate models into a single wide table.
+      Includes a computed health_score (0-100) based on usage, support, and retention signals.
+      Materialized as table due to join complexity; referenced by multiple gold models.
+    columns:
+      - name: account_id
+        tests:
+          - not_null
+          - unique
+      - name: health_score
+        description: Composite score from 0-100 based on engagement, satisfaction, escalations, and feature breadth.
+        tests:
+          - not_null

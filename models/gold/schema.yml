@@ -1,0 +1,96 @@
+version: 2
+
+models:
+  - name: gold_account_health_summary
+    description: >
+      Grain: one row per account.
+      Primary gold model for account health dashboards and CSM tooling.
+      Includes plan, revenue, engagement, support, churn context, and a health_status label.
+      Source of truth for account-level KPIs.
+    columns:
+      - name: account_id
+        tests:
+          - not_null
+          - unique
+      - name: health_status
+        description: "Derived label: Healthy / At Risk / Critical / Churned"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Healthy', 'At Risk', 'Critical', 'Churned']
+
+  - name: gold_churn_analysis
+    description: >
+      Grain: one row per churn event.
+      Used for churn root cause analysis, cohort analysis, and revenue leakage reporting.
+      Includes tenure bucket, churn path, MRR lost, and refund amount.
+    columns:
+      - name: churn_event_id
+        tests:
+          - not_null
+          - unique
+      - name: mrr_lost
+        tests:
+          - not_null
+
+  - name: gold_mrr_trends
+    description: >
+      Grain: one row per month per plan tier.
+      Core SaaS revenue metrics: new MRR, churned MRR, expansion MRR, contraction MRR, net MRR change.
+      Used for executive dashboards and board reporting. Excludes trial subscriptions.
+    columns:
+      - name: month_start
+        tests:
+          - not_null
+
+  - name: gold_feature_adoption
+    description: >
+      Grain: one row per feature per month per plan tier.
+      Tracks feature adoption trends, active accounts, usage volume, error rates, and session duration.
+      Used for product analytics and feature prioritization.
+    columns:
+      - name: feature_name
+        tests:
+          - not_null
+      - name: usage_month
+        tests:
+          - not_null
+
+  - name: gold_support_performance
+    description: >
+      Grain: one row per month per priority level.
+      SLA and support quality metrics: resolution time (avg/median/p95), first response time,
+      satisfaction score, and escalation rate.
+      Used by customer success and support leadership.
+    columns:
+      - name: ticket_month
+        tests:
+          - not_null
+      - name: priority
+        tests:
+          - not_null
+
+  - name: gold_customer_segments
+    description: >
+      Grain: one row per active account.
+      Rule-based customer segmentation into labels like Champion, Loyal, At Risk, Hibernating.
+      Includes a recommended_action field for CS and sales teams.
+      Excludes churned accounts.
+    columns:
+      - name: account_id
+        tests:
+          - not_null
+          - unique
+      - name: customer_segment
+        tests:
+          - not_null
+          - accepted_values:
+              values:
+                - 'Champion'
+                - 'Loyal'
+                - 'Promising'
+                - 'New Customer'
+                - 'At Risk – Downgraded'
+                - 'Hibernating'
+                - 'Critical – Likely to Churn'
+                - 'Needs Attention'
