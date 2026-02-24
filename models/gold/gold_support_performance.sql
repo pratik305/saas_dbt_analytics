@@ -52,14 +52,18 @@ final as (
 
         -- Rates
         round(
-            count(case when escalation_flag = true then 1 end) * 100.0
-            / nullif(count(ticket_id), 0), 2
-        )                                                       as escalation_rate_pct,
+            {{ safe_divide(
+                'count(case when escalation_flag = true then 1 end) * 100.0',
+                'count(ticket_id)'
+            ) }},
+        2)                                                      as escalation_rate_pct,
 
         round(
-            count(case when satisfaction_score is not null then 1 end) * 100.0
-            / nullif(count(ticket_id), 0), 2
-        )                                                       as csat_response_rate_pct,
+            {{ safe_divide(
+                'count(case when satisfaction_score is not null then 1 end) * 100.0',
+                'count(ticket_id)'
+            ) }},
+        2)                                                      as csat_response_rate_pct,
 
         current_timestamp()                                     as updated_at
 

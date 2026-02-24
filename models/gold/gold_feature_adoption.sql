@@ -1,7 +1,7 @@
 {{ config(materialized='table') }}
 
 /*
-    Grain: one row per feature per month
+    Grain: one row per feature per month per plan tier
     Tracks feature adoption trends, error rates, and engagement by plan tier.
     Used for product analytics and feature prioritization.
 */
@@ -32,7 +32,6 @@ subscriptions as (
 
 ),
 
--- Join usage to account/plan context
 enriched as (
 
     select
@@ -69,16 +68,15 @@ aggregated as (
         round(sum(total_usage_duration_secs) / 3600.0, 2)      as total_usage_hours,
         round(avg(total_usage_duration_secs) / 60.0, 2)        as avg_session_minutes,
 
-        -- Quality
+        -- Quality 
         sum(total_error_count)                                  as total_errors,
         round(
-            sum(total_error_count) * 100.0
-            / nullif(sum(total_usage_count), 0), 2
-        )                                                       as error_rate_pct,
+            {{ safe_divide('sum(total_error_count) * 100.0', 'sum(total_usage_count)') }},
+        2)                                                      as error_rate_pct,
 
         current_timestamp()                                     as updated_at
 
-    from enriched
+    from enriched 
     group by
         feature_name,
         usage_month,

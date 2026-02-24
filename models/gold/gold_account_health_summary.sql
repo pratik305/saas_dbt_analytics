@@ -45,7 +45,11 @@ final as (
         top_feature,
         last_usage_date,
         beta_features_used,
-        error_rate_pct,
+
+        -- Error rate — using safe_divide macro
+        round(
+            {{ safe_divide('total_error_count * 100.0', 'total_usage_count') }},
+        2)                                                      as error_rate_pct,
 
         -- Support
         total_tickets,
@@ -65,13 +69,12 @@ final as (
         -- Health
         health_score,
         case
-            when churn_flag = true                          then 'Churned'
-            when health_score >= 75                         then 'Healthy'
-            when health_score >= 50                         then 'At Risk'
-            else                                                'Critical'
+            when churn_flag = true                              then 'Churned'
+            when health_score >= 75                             then 'Healthy'
+            when health_score >= 50                             then 'At Risk'
+            else                                                     'Critical'
         end                                                     as health_status,
 
-        -- Metadata
         current_timestamp()                                     as updated_at
 
     from base
